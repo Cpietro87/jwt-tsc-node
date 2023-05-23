@@ -22,17 +22,28 @@ const singup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         email: req.body.email,
         password: req.body.password
     });
+    user.password = yield user.encryptPassword(user.password);
     const savedUser = yield user.save();
     // creating new token
     const token = jsonwebtoken_1.default.sign({ _id: savedUser._id }, process.env.TOKEN_SECRET || 'tokentest');
     res.header('auth-token', token).json(savedUser);
 });
 exports.singup = singup;
-const singin = (req, res) => {
-    res.send('singin');
-};
+const singin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield User_1.default.findOne({ email: req.body.email });
+    if (!user)
+        return res.status(400).json('El email es incorrecto');
+    const correctPassword = yield user.validatePassword(req.body.password);
+    if (!correctPassword)
+        return res.status(400).json('El password es incorrecto');
+    const token = jsonwebtoken_1.default.sign({ _id: user._id }, process.env.TOKEN_SECRET || 'tokentest', {
+        expiresIn: 60 * 60 * 24
+    });
+    res.header('auth-token').json(user);
+});
 exports.singin = singin;
 const profile = (req, res) => {
+    console.log(res.header('auth-token'));
     res.send('profile');
 };
 exports.profile = profile;
