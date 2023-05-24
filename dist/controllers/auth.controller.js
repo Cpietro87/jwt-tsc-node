@@ -39,12 +39,14 @@ const singin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const token = jsonwebtoken_1.default.sign({ _id: user._id }, process.env.TOKEN_SECRET || 'tokentest', {
         expiresIn: 60 * 60 * 24
     });
-    res.header('auth-token').json(user);
+    res.header('auth-token', token).json(user);
 });
 exports.singin = singin;
 const profile = (req, res) => {
-    console.log(res.header('auth-token'));
-    res.send('profile');
+    const user = User_1.default.findById(req.userId);
+    if (!user)
+        return res.status(404).json('No user found');
+    res.json(user);
 };
 exports.profile = profile;
 //# sourceMappingURL=auth.controller.js.map

@@ -27,11 +27,12 @@ export const singin = async (req: Request, res: Response) => {
     const token: string = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET || 'tokentest', {
         expiresIn: 60*60*24
     });
-    res.header('auth-token').json(user);
+    res.header('auth-token',token).json(user);
 
 };
 
 export const profile = (req: Request, res: Response) => {
-    console.log(res.header('auth-token'));
-    res.send('profile');
+    const user = User.findById(req.userId);
+    if(!user) return res.status(404).json('No user found')
+    res.json(user);
 };
